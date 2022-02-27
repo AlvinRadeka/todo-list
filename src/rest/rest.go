@@ -85,7 +85,8 @@ func (r *rest) SaveHistory(ctx *gin.Context) {
 		return
 	}
 
-	if err := r.uc.SaveHistory(todo); err != nil {
+	_, err := r.uc.SaveHistory(todo)
+	if err != nil {
 		httpRespError(ctx, "cannot save todo history", http.StatusInternalServerError, err)
 		return
 	}

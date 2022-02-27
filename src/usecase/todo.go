@@ -8,7 +8,7 @@ import (
 )
 
 type Interface interface {
-	SaveHistory(todo entity.Todo) error
+	SaveHistory(todo entity.Todo) (int, error)
 	ReadHistory(todoID int) (entity.Todo, error)
 }
 
@@ -22,7 +22,7 @@ func NewUC(dom domain.Interface) Interface {
 	}
 }
 
-func (u *uc) SaveHistory(todo entity.Todo) error {
+func (u *uc) SaveHistory(todo entity.Todo) (int, error) {
 	return u.dom.SaveHistory(todo)
 }
 

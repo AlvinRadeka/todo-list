@@ -12,7 +12,7 @@ import (
 )
 
 type Interface interface {
-	SaveHistory(todo entity.Todo) error
+	SaveHistory(todo entity.Todo) (int, error)
 	ReadHistory(todoID int) (entity.Todo, error)
 }
 
@@ -35,35 +35,33 @@ func NewDom() Interface {
 	}
 }
 
-func (d *dom) SaveHistory(todo entity.Todo) error {
+func (d *dom) SaveHistory(todo entity.Todo) (int, error) {
 	tx, err := d.db.BeginTx(context.Background(), &sql.TxOptions{})
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	res, err := tx.Exec(saveTodoHistory, todo.ID, todo.Title, todo.Description, todo.Status, todo.CreatedBy, todo.CreatedAt)
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
-			return err
+			return 0, err
 		}
-		return err
+		return 0, err
 	}
 
 	lastID, err := res.LastInsertId()
 	if err != nil {
 		if err := tx.Rollback(); err != nil {
-			return err
+			return 0, err
 		}
-		return err
+		return 0, err
 	}
-
-	log.Println("latest history ID: ", lastID)
 
 	if err := tx.Commit(); err != nil {
-		return err
+		return int(lastID), err
 	}
 
-	return nil
+	return int(lastID), nil
 }
 
 func (d *dom) ReadHistory(todoID int) (entity.Todo, error) {
